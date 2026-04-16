@@ -15,6 +15,7 @@ dependencies = [
   "shap>=0.45.0",
   "mlflow>=2.16.0",
   "databricks-sql-connector>=3.0.0",
+  "cffi>=1.16.0",
 ]
 
 [project.scripts]

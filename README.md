@@ -18,6 +18,12 @@ pip install -e .
 cp .env.example .env
 ```
 
+If you see `No module named '_cffi_backend'` when the app loads the model, reinstall native deps:
+
+```bash
+pip install --force-reinstall 'cffi>=1.16.0' cryptography
+```
+
 Edit `.env`:
 
 - **DATABRICKS_HOST** — workspace URL, e.g. `https://adb-xxxx.azuredatabricks.net`
