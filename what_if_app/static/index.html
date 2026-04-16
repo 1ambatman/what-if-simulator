@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>What-If Score Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="bg-grid"></div>
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+
+    <header class="top">
+      <div class="brand">
+        <span class="logo">◇</span>
+        <div>
+          <h1>What-If Score Simulator</h1>
+          <p class="tagline">LightGBM · SHAP · Unity Catalog</p>
+        </div>
+      </div>
+      <div id="health-pill" class="pill pill-warn">Checking…</div>
+    </header>
+
+    <main class="layout">
+      <section class="panel glass">
+        <h2 class="panel-title">Databricks</h2>
+        <label class="field">
+          <span>Predictions table</span>
+          <input type="text" id="predictions-table" autocomplete="off" />
+        </label>
+        <div class="tabs">
+          <button type="button" class="tab active" data-tab="inline">Inline IDs</button>
+          <button type="button" class="tab" data-tab="table">Input table</button>
+        </div>
+        <div id="pane-inline" class="pane">
+          <label class="field">
+            <span>Customer IDs <small>(one per line)</small></span>
+            <textarea id="customer-ids" rows="4" spellcheck="false"></textarea>
+          </label>
+          <label class="field">
+            <span>Reference dates <small>(one line, or one per customer)</small></span>
+            <textarea id="reference-dates" rows="2" spellcheck="false">2026-02-28</textarea>
+          </label>
+        </div>
+        <div id="pane-table" class="pane hidden">
+          <label class="field">
+            <span>Input table <small>(columns: customer_id, reference_date)</small></span>
+            <input type="text" id="input-table" placeholder="catalog.schema.whatif_customer_list" />
+          </label>
+        </div>
+        <button type="button" id="btn-load" class="btn primary">Load profiles</button>
+        <p id="load-msg" class="hint"></p>
+      </section>
+
+      <section class="panel glass stretch">
+        <h2 class="panel-title">Simulation</h2>
+        <div class="row">
+          <label class="field grow">
+            <span>Profile</span>
+            <select id="profile-select"></select>
+          </label>
+          <label class="field grow">
+            <span>Scenario</span>
+            <select id="scenario-select"></select>
+          </label>
+        </div>
+        <div class="row">
+          <button type="button" id="btn-run" class="btn primary">Run what-if</button>
+        </div>
+
+        <div id="manual-wrap" class="manual-wrap hidden">
+          <h3 class="sub-title">Manual features</h3>
+          <div id="manual-acc"></div>
+        </div>
+
+        <div id="results" class="results"></div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span>Runs locally · Model via MLflow · Data via Databricks SQL</span>
+    </footer>
+
+    <script src="/static/app.js" type="module"></script>
+  </body>
+</html>
