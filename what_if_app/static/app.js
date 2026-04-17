@@ -1,5 +1,155 @@
 const $ = (sel) => document.querySelector(sel);
 
+/** Mirrors ml_core.TIER_* — used if /api/meta has not loaded yet. */
+const FALLBACK_TIER = {
+  boundaries: [
+    [1, 0.0, 0.0393],
+    [2, 0.0393, 0.0597],
+    [3, 0.0597, 0.0787],
+    [4, 0.0787, 0.1016],
+    [5, 0.1016, 0.1398],
+    [6, 0.1398, 0.2129],
+    [7, 0.2129, 0.3426],
+    [8, 0.3426, 0.5897],
+    [9, 0.5897, 0.7855],
+    [10, 0.7855, 1.0],
+  ],
+  labels: { Good: [0, 0.0597], Okay: [0.0597, 0.5897], Risky: [0.5897, 1.0] },
+};
+
+let tierDefaults = null;
+
+function cloneTier(src) {
+  return {
+    boundaries: src.boundaries.map((r) => [...r]),
+    labels: JSON.parse(JSON.stringify(src.labels)),
+  };
+}
+
+function getTierConfig() {
+  const base = tierDefaults ? cloneTier(tierDefaults) : cloneTier(FALLBACK_TIER);
+  try {
+    const raw = localStorage.getItem("what_if_tier_config");
+    if (!raw) {
+      return base;
+    }
+    const o = JSON.parse(raw);
+    if (Array.isArray(o.boundaries) && o.boundaries.length) {
+      base.boundaries = o.boundaries.map((r) => [Number(r[0]), Number(r[1]), Number(r[2])]);
+    }
+    if (o.labels && typeof o.labels === "object") {
+      for (const k of Object.keys(base.labels)) {
+        if (o.labels[k] && o.labels[k].length >= 2) {
+          base.labels[k] = [Number(o.labels[k][0]), Number(o.labels[k][1])];
+        }
+      }
+    }
+    return base;
+  } catch {
+    return tierDefaults ? cloneTier(tierDefaults) : cloneTier(FALLBACK_TIER);
+  }
+}
+
+function scoreToTierNum(score, cfg) {
+  const s = Number(score);
+  for (const row of cfg.boundaries) {
+    const tn = row[0];
+    const lo = row[1];
+    const hi = row[2];
+    if (s >= lo && s <= hi) {
+      return tn;
+    }
+  }
+  const last = cfg.boundaries[cfg.boundaries.length - 1];
+  return last ? last[0] : 10;
+}
+
+function scoreToLabel(score, cfg) {
+  const s = Number(score);
+  for (const [lab, range] of Object.entries(cfg.labels)) {
+    if (s >= range[0] && s <= range[1]) {
+      return lab;
+    }
+  }
+  return "Risky";
+}
+
+function tierMigrationTextClient(scoreBefore, scoreAfter, cfg) {
+  const t1 = scoreToTierNum(scoreBefore, cfg);
+  const t2 = scoreToTierNum(scoreAfter, cfg);
+  const l1 = scoreToLabel(scoreBefore, cfg);
+  const l2 = scoreToLabel(scoreAfter, cfg);
+  const diff = Number(scoreAfter) - Number(scoreBefore);
+  const arrow = diff > 0 ? "\u2191" : "\u2193";
+  return (
+    `Tier ${t1} (${l1}) \u2192 Tier ${t2} (${l2})  |  Score: ${Number(scoreBefore).toFixed(4)} ${arrow} ${Number(scoreAfter).toFixed(4)} ` +
+    `(${diff > 0 ? "+" : ""}${diff.toFixed(4)})`
+  );
+}
+
+function renderTierEditors() {
+  const cfg = getTierConfig();
+  const bw = $("#tier-boundaries-wrap");
+  const lw = $("#tier-labels-wrap");
+  if (!bw || !lw) {
+    return;
+  }
+  let tb = `<h4>Score bands (tier 1–10)</h4><table class="tier-table"><thead><tr><th>Tier</th><th>Low</th><th>High</th></tr></thead><tbody>`;
+  for (const row of cfg.boundaries) {
+    const [tn, lo, hi] = row;
+    tb += `<tr><td>${tn}</td><td><input type="number" step="0.0001" min="0" max="1" data-tier-bound="lo" data-tier="${tn}" value="${lo}" /></td><td><input type="number" step="0.0001" min="0" max="1" data-tier-bound="hi" data-tier="${tn}" value="${hi}" /></td></tr>`;
+  }
+  tb += `</tbody></table>`;
+  bw.innerHTML = tb;
+
+  const order = ["Good", "Okay", "Risky"];
+  let tl = `<h4>Risk labels</h4><table class="tier-table"><thead><tr><th>Label</th><th>Low</th><th>High</th></tr></thead><tbody>`;
+  for (const name of order) {
+    const range = cfg.labels[name] || [0, 1];
+    tl += `<tr><td>${escapeHtml(name)}</td><td><input type="number" step="0.0001" min="0" max="1" data-risk="${escapeHtml(name)}" data-end="lo" value="${range[0]}" /></td><td><input type="number" step="0.0001" min="0" max="1" data-risk="${escapeHtml(name)}" data-end="hi" value="${range[1]}" /></td></tr>`;
+  }
+  tl += `</tbody></table>`;
+  lw.innerHTML = tl;
+}
+
+function readTierConfigFromForm() {
+  const cfg = tierDefaults ? cloneTier(tierDefaults) : cloneTier(FALLBACK_TIER);
+  document.querySelectorAll("#tier-boundaries-wrap input[data-tier-bound]").forEach((inp) => {
+    const tier = Number(inp.dataset.tier);
+    const isHi = inp.dataset.tierBound === "hi";
+    const row = cfg.boundaries.find((r) => r[0] === tier);
+    if (!row) {
+      return;
+    }
+    const v = Number(inp.value);
+    if (!Number.isFinite(v)) {
+      return;
+    }
+    if (isHi) {
+      row[2] = v;
+    } else {
+      row[1] = v;
+    }
+  });
+  document.querySelectorAll("#tier-labels-wrap input[data-risk]").forEach((inp) => {
+    const name = inp.dataset.risk;
+    const end = inp.dataset.end;
+    if (!cfg.labels[name]) {
+      return;
+    }
+    const v = Number(inp.value);
+    if (!Number.isFinite(v)) {
+      return;
+    }
+    if (end === "lo") {
+      cfg.labels[name][0] = v;
+    } else {
+      cfg.labels[name][1] = v;
+    }
+  });
+  return cfg;
+}
+
 async function api(path, opts = {}) {
   const r = await fetch(path, {
     headers: { "Content-Type": "application/json", ...opts.headers },
@@ -59,6 +209,11 @@ let currentManual = {};
 async function refreshMeta() {
   const meta = await api("/api/meta");
   $("#predictions-table").value = meta.predictions_table_default || "";
+  tierDefaults = {
+    boundaries: (meta.tier_boundaries || FALLBACK_TIER.boundaries).map((r) => [...r]),
+    labels: meta.tier_labels ? JSON.parse(JSON.stringify(meta.tier_labels)) : JSON.parse(JSON.stringify(FALLBACK_TIER.labels)),
+  };
+  renderTierEditors();
   const sel = $("#scenario-select");
   sel.innerHTML = "";
   ["(No scenario)", ...meta.scenarios.map((s) => s.name), "Manual adjustment"].forEach((name) => {
@@ -75,11 +230,35 @@ function tierColor(label) {
   return "var(--bad)";
 }
 
+/** Coerce API rows so SHAP math never produces NaN coordinates in the SVG. */
+function normalizeWaterfallRows(rows) {
+  if (!Array.isArray(rows)) {
+    return [];
+  }
+  return rows.map((r) => {
+    const shap = Number(r.shap);
+    const valueRaw = r.value;
+    let value = null;
+    if (valueRaw != null && valueRaw !== "") {
+      const v = Number(valueRaw);
+      if (Number.isFinite(v)) {
+        value = v;
+      }
+    }
+    return {
+      feature: r.feature != null ? String(r.feature) : "?",
+      shap: Number.isFinite(shap) ? shap : 0,
+      value,
+    };
+  });
+}
+
 /** Top-|SHAP| rows + remainder so cumulative matches model score (bridge-style waterfall). */
 function buildWaterfallSteps(baseValue, score, rows) {
-  const sumDisplayed = rows.reduce((s, r) => s + r.shap, 0);
+  const norm = normalizeWaterfallRows(rows);
+  const sumDisplayed = norm.reduce((s, r) => s + r.shap, 0);
   const remainder = score - baseValue - sumDisplayed;
-  const steps = rows.map((r) => ({ ...r }));
+  const steps = norm.map((r) => ({ ...r }));
   if (Math.abs(remainder) > 1e-5) {
     steps.push({ feature: "Other features", shap: remainder, value: null });
   }
@@ -96,6 +275,12 @@ function svgEscape(s) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+/** Feature name only — second line in waterfall (keeps long names from overlapping the plot). */
+function shortWaterfallFeat(f) {
+  const s = String(f);
+  return s.length > 52 ? s.slice(0, 50) + "…" : s;
 }
 
 /** Format feature value for SHAP-style label (value = name). */
@@ -115,24 +300,29 @@ function formatFeatVal(v) {
  * (same idea as shap.plots.waterfall — see https://shap.readthedocs.io/en/latest/example_notebooks/api_examples/plots/waterfall.html).
  */
 function renderWaterfallSvg(baseValue, score, rows) {
-  const { steps, cum } = buildWaterfallSteps(baseValue, score, rows);
+  const base = Number(baseValue);
+  const sc = Number(score);
+  if (!Number.isFinite(base) || !Number.isFinite(sc)) {
+    return `<p class="waterfall-empty">Cannot draw SHAP waterfall: invalid base value or score from the server.</p>`;
+  }
+  const { steps, cum } = buildWaterfallSteps(base, sc, rows);
   const n = steps.length;
   if (n === 0) {
     return `<p class="waterfall-empty">No SHAP rows to plot.</p>`;
   }
 
-  const rowH = 28;
-  const padL = 228;
+  const rowH = 38;
+  const padL = 372;
   const padR = 28;
-  const padT = 12;
-  const padB = 40;
+  const padT = 14;
+  const padB = 42;
   const numRows = n + 2;
   const H = padT + numRows * rowH + padB;
-  const W = 820;
+  const W = 960;
   const plotW = W - padL - padR;
 
-  let xmin = Math.min(...cum, score);
-  let xmax = Math.max(...cum, score);
+  let xmin = Math.min(...cum, sc);
+  let xmax = Math.max(...cum, sc);
   const xr = xmax - xmin || 1;
   xmin -= xr * 0.06;
   xmax += xr * 0.06;
@@ -149,14 +339,15 @@ function renderWaterfallSvg(baseValue, score, rows) {
   const negFill = "#008bfb";
   const gridStroke = "rgba(120, 160, 255, 0.14)";
   const connStroke = "rgba(200, 210, 240, 0.45)";
-  const font = "JetBrains Mono,ui-monospace,monospace";
-
   const yMid = (row) => padT + row * rowH + rowH / 2;
 
   let svg = "";
 
   for (let t = 0; t < tickVals.length; t++) {
     const xv = xScale(tickVals[t]);
+    if (!Number.isFinite(xv)) {
+      continue;
+    }
     svg += `<line x1="${xv}" y1="${padT}" x2="${xv}" y2="${H - padB}" stroke="${gridStroke}" stroke-width="1"/>`;
   }
 
@@ -165,7 +356,7 @@ function renderWaterfallSvg(baseValue, score, rows) {
     svg += `<line x1="${padL}" y1="${yy}" x2="${W - padR}" y2="${yy}" stroke="${gridStroke}" stroke-width="1"/>`;
   }
 
-  svg += `<line x1="${xScale(score)}" y1="${padT}" x2="${xScale(score)}" y2="${H - padB}" stroke="rgba(251,113,133,0.35)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  svg += `<line x1="${xScale(sc)}" y1="${padT}" x2="${xScale(sc)}" y2="${H - padB}" stroke="rgba(251,113,133,0.35)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
 
   for (let i = 0; i < n; i++) {
     const row = 1 + i;
@@ -173,9 +364,9 @@ function renderWaterfallSvg(baseValue, score, rows) {
     const x2 = xScale(cum[i + 1]);
     const left = Math.min(x1, x2);
     const wbar = Math.max(Math.abs(x2 - x1), 2);
-    const top = yMid(row) - 7;
+    const top = yMid(row) - 8;
     const col = steps[i].shap >= 0 ? posFill : negFill;
-    svg += `<rect x="${left}" y="${top}" width="${wbar}" height="14" fill="${col}" fill-opacity="0.92" rx="2"/>`;
+    svg += `<rect x="${left}" y="${top}" width="${wbar}" height="16" fill="${col}" fill-opacity="0.92" rx="2"/>`;
   }
 
   svg += `<line x1="${xScale(cum[0])}" y1="${yMid(n + 1)}" x2="${xScale(cum[0])}" y2="${yMid(1)}" stroke="${connStroke}" stroke-width="1.5"/>`;
@@ -194,27 +385,32 @@ function renderWaterfallSvg(baseValue, score, rows) {
     const phi = steps[i].shap;
     const sign = phi >= 0 ? "+" : "";
     const tx = left + wbar / 2;
-    svg += `<text x="${tx}" y="${yMid(row) + 4}" text-anchor="middle" fill="#f0f4ff" font-size="11" font-weight="600" font-family="${font}">${svgEscape(sign + phi.toFixed(4))}</text>`;
+    svg += `<text class="wf-svg-phi" x="${tx}" y="${yMid(row) + 5}" text-anchor="middle">${svgEscape(sign + phi.toFixed(4))}</text>`;
   }
 
-  svg += `<text x="10" y="${yMid(0) + 4}" fill="#e8ecff" font-size="12" font-family="${font}" font-weight="600">${svgEscape(`f(x) = ${score.toFixed(4)}`)}</text>`;
+  svg += `<text class="wf-svg-title" x="12" y="${yMid(0) + 5}">${svgEscape(`f(x) = ${sc.toFixed(4)}`)}</text>`;
   for (let i = 0; i < n; i++) {
     const row = 1 + i;
     const st = steps[i];
-    const lab = `${formatFeatVal(st.value)} = ${shortFeat(st.feature)}`;
-    const labTrunc = lab.length > 52 ? lab.slice(0, 50) + "…" : lab;
-    svg += `<g><title>${svgEscape(st.feature)}</title><text x="10" y="${yMid(row) + 4}" fill="#c8d0f0" font-size="11" font-family="${font}">${svgEscape(labTrunc)}</text></g>`;
+    svg += `<g><title>${svgEscape(st.feature)}</title>
+      <text class="wf-feat-val" x="12" y="${yMid(row) - 8}">${svgEscape(`${formatFeatVal(st.value)} =`)}</text>
+      <text class="wf-feat-name" x="12" y="${yMid(row) + 10}">${svgEscape(shortWaterfallFeat(st.feature))}</text>
+    </g>`;
   }
-  svg += `<text x="10" y="${yMid(n + 1) + 4}" fill="#e8ecff" font-size="12" font-family="${font}" font-weight="600">${svgEscape(`E[f(x)] = ${baseValue.toFixed(4)}`)}</text>`;
+  svg += `<text class="wf-svg-title" x="12" y="${yMid(n + 1) + 5}">${svgEscape(`E[f(x)] = ${base.toFixed(4)}`)}</text>`;
 
   let xTickStr = "";
   for (const tv of tickVals) {
-    xTickStr += `<text x="${xScale(tv)}" y="${H - 14}" text-anchor="middle" fill="#8b95b8" font-size="10" font-family="${font}">${svgEscape(Number(tv.toFixed(5)))}</text>`;
+    const xs = xScale(tv);
+    if (!Number.isFinite(xs)) {
+      continue;
+    }
+    xTickStr += `<text class="wf-svg-tick" x="${xs}" y="${H - 14}" text-anchor="middle">${svgEscape(String(Number(tv.toFixed(5))))}</text>`;
   }
 
   return `
     <div class="waterfall-wrap wf-shap" role="img" aria-label="SHAP waterfall plot: expected value plus per-feature contributions to model output">
-      <svg class="waterfall-svg wf-horizontal" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+      <svg xmlns="http://www.w3.org/2000/svg" class="waterfall-svg wf-horizontal" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
         ${svg}
         ${xTickStr}
       </svg>
@@ -229,14 +425,18 @@ function renderWaterfallSvg(baseValue, score, rows) {
 
 function renderBaseline(data) {
   const wf = data.waterfall || [];
+  const tc = getTierConfig();
+  const tnum = scoreToTierNum(data.score, tc);
+  const rlab = scoreToLabel(data.score, tc);
   return `
     <div class="card">
       <h3>Baseline · ${escapeHtml(data.profile_label || "")}</h3>
       <p style="font-family:var(--mono);font-size:0.95rem">
         Score <strong style="color:var(--accent)">${data.score.toFixed(4)}</strong>
-        · Tier <strong style="color:${tierColor(data.risk_label)}">${data.tier}</strong>
-        (${escapeHtml(data.risk_label)})
+        · Tier <strong style="color:${tierColor(rlab)}">${tnum}</strong>
+        (${escapeHtml(rlab)})
       </p>
+      <p style="font-size:0.72rem;color:var(--muted)">Tiers use your <strong>Tier definitions</strong> in the left panel (saved in this browser).</p>
       <h4 style="margin:1rem 0 0.5rem;font-size:0.85rem;color:var(--muted)">SHAP waterfall</h4>
       ${renderWaterfallSvg(data.base_value, data.score, wf)}
     </div>`;
@@ -252,7 +452,16 @@ function escapeHtml(s) {
   return d.innerHTML;
 }
 
+/** Insert HTML into a container using a &lt;template&gt; so SVG is parsed in the SVG namespace (avoids missing charts with innerHTML in some browsers). */
+function mountHtml(container, html) {
+  const t = document.createElement("template");
+  t.innerHTML = html.trim();
+  container.replaceChildren(t.content);
+}
+
 function renderCompare(data) {
+  const tc = getTierConfig();
+  const mig = tierMigrationTextClient(data.score_before, data.score_after, tc);
   const maxH = Math.max(data.score_before, data.score_after, 0.001) * 1.15;
   const hBefore = (data.score_before / maxH) * 100;
   const hAfter = (data.score_after / maxH) * 100;
@@ -270,16 +479,17 @@ function renderCompare(data) {
     <div class="card">
       <h3>${escapeHtml(data.scenario || "")}</h3>
       <p style="font-size:0.8rem;color:var(--muted)">${escapeHtml(data.description || "")}</p>
-      <div class="migration">${escapeHtml(data.tier_migration || "")}</div>
+      <p style="font-size:0.72rem;color:var(--muted);margin:0 0 0.5rem">Tiers use your <strong>Tier definitions</strong> on the left (browser-saved).</p>
+      <div class="migration">${escapeHtml(mig)}</div>
       <div class="score-compare">
         <div class="score-bar">
           <div class="lbl">Before</div>
-          <div class="val" style="color:${tierColor(data.label_before)}">${data.score_before.toFixed(4)}</div>
+          <div class="val" style="color:${tierColor(scoreToLabel(data.score_before, tc))}">${data.score_before.toFixed(4)}</div>
           <div class="bar-track"><div class="bar-fill before" style="height:${hBefore}%"></div></div>
         </div>
         <div class="score-bar">
           <div class="lbl">After</div>
-          <div class="val" style="color:${tierColor(data.label_after)}">${data.score_after.toFixed(4)}</div>
+          <div class="val" style="color:${tierColor(scoreToLabel(data.score_after, tc))}">${data.score_after.toFixed(4)}</div>
           <div class="bar-track"><div class="bar-fill after" style="height:${hAfter}%"></div></div>
         </div>
       </div>
@@ -405,6 +615,7 @@ async function init() {
         const o = document.createElement("option");
         o.value = p.id;
         o.textContent = p.label;
+        o.title = p.label;
         ps.appendChild(o);
       });
       let msg = res.loaded ? `Loaded ${res.loaded} profile(s).` : (res.warning || "Done.");
@@ -415,6 +626,32 @@ async function init() {
       }
     } catch (e) {
       $("#load-msg").innerHTML = `<span class="err">${escapeHtml(String(e))}</span>`;
+    }
+  });
+
+  $("#btn-tier-save")?.addEventListener("click", () => {
+    try {
+      const cfg = readTierConfigFromForm();
+      localStorage.setItem("what_if_tier_config", JSON.stringify(cfg));
+      const msg = $("#tier-save-msg");
+      if (msg) {
+        msg.textContent = "Saved. Click Run what-if again to refresh tier labels in the results.";
+      }
+    } catch (e) {
+      console.error(e);
+      const msg = $("#tier-save-msg");
+      if (msg) {
+        msg.textContent = `Save failed: ${e}`;
+      }
+    }
+  });
+
+  $("#btn-tier-reset")?.addEventListener("click", () => {
+    localStorage.removeItem("what_if_tier_config");
+    renderTierEditors();
+    const msg = $("#tier-save-msg");
+    if (msg) {
+      msg.textContent = "Restored server defaults in the form. Click Run what-if to refresh results.";
     }
   });
 
@@ -452,12 +689,15 @@ async function init() {
     $("#results").innerHTML = `<div class="card">Running…</div>`;
     try {
       const data = await api("/api/what-if", { method: "POST", body: JSON.stringify(payload) });
+      let html;
       if (data.mode === "baseline") {
-        $("#results").innerHTML = renderBaseline(data);
+        html = renderBaseline(data);
       } else {
-        $("#results").innerHTML = renderCompare(data);
+        html = renderCompare(data);
       }
+      mountHtml($("#results"), html);
     } catch (e) {
+      console.error(e);
       $("#results").innerHTML = `<div class="card err">${escapeHtml(String(e))}</div>`;
     }
   });

@@ -81,8 +81,9 @@ def _build_profiles_from_df(df: pd.DataFrame) -> None:
     if not ml_core.is_ready():
         raise RuntimeError("Model not loaded")
     for _, row in df.iterrows():
-        cid = str(row["customer_id"])
-        ref = str(row["reference_date"])[:10]
+        cid = str(row["customer_id"]).strip()
+        ref_full = str(row["reference_date"]).strip()
+        ref = ref_full[:10]
         pid = _profile_id(cid, ref)
         raw = row.get("prediction_info_json")
         inp = parse_prediction_json(raw)
@@ -96,8 +97,8 @@ def _build_profiles_from_df(df: pd.DataFrame) -> None:
         profile_meta[pid] = {
             "id": pid,
             "customer_id": cid,
-            "reference_date": ref,
-            "label": f"Tier {tier} ({label}) — {cid[:12]}... [{ref}]",
+            "reference_date": ref_full,
+            "label": f"Tier {tier} ({label}) — {cid} · {ref_full}",
             "score": score,
             "model_score_table": float(ms) if ms is not None and not pd.isna(ms) else None,
             "tier": tier,
@@ -169,6 +170,8 @@ def meta() -> dict[str, Any]:
         "feature_groups": {k: v for k, v in fg.items() if v},
         "scenarios": scenarios,
         "profile_count": len(profiles_store),
+        "tier_boundaries": [[tn, lo, hi] for tn, lo, hi in ml_core.TIER_BOUNDARIES],
+        "tier_labels": {k: [float(v[0]), float(v[1])] for k, v in ml_core.TIER_LABELS.items()},
     }
 
 

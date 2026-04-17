@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/style.css?v=4" />
   </head>
   <body>
     <div class="bg-grid"></div>
@@ -59,6 +59,16 @@
         </div>
         <button type="button" id="btn-load" class="btn primary">Load profiles</button>
         <p id="load-msg" class="hint"></p>
+
+        <h3 class="sub-title">Tier definitions</h3>
+        <p class="hint tier-hint">Edit score bands and risk labels. Saved in this browser only. Re-run <strong>Run what-if</strong> to refresh tier text in results.</p>
+        <div id="tier-boundaries-wrap" class="tier-wrap"></div>
+        <div id="tier-labels-wrap" class="tier-wrap"></div>
+        <div class="tier-actions">
+          <button type="button" id="btn-tier-save" class="btn secondary">Save tier settings</button>
+          <button type="button" id="btn-tier-reset" class="btn">Reset to defaults</button>
+        </div>
+        <p id="tier-save-msg" class="hint" aria-live="polite"></p>
       </section>
 
       <section class="panel glass stretch">
@@ -90,6 +100,6 @@
       <span>Runs locally · Model via MLflow · Data via Databricks SQL</span>
     </footer>
 
-    <script src="/static/app.js" type="module"></script>
+    <script src="/static/app.js?v=5" defer></script>
   </body>
 </html>
