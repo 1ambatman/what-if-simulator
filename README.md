@@ -4,9 +4,12 @@ Local web app that reproduces the **what_if_simulator** notebook: load customer 
 
 ## Repository
 
-- **GitHub:** [github.com/1ambatman/zds-what-if-simulator](https://github.com/1ambatman/zds-what-if-simulator) (repository renamed from `what-if-simulator`).
-- If your local clone still uses the old remote URL, run:  
-  `git remote set-url origin https://github.com/1ambatman/zds-what-if-simulator.git`
+- **GitHub:** [1ambatman/what-if-simulator](https://github.com/1ambatman/what-if-simulator) — to match this app name, rename the repo on GitHub to **`zds-what-if-simulator`**: **Settings → General → Repository name** → save.
+- After renaming, point your local `origin` at the new URL (GitHub redirects the old URL for a while, but updating is best):
+
+  ```bash
+  git remote set-url origin https://github.com/1ambatman/zds-what-if-simulator.git
+  ```
 
 ## Prerequisites
 
