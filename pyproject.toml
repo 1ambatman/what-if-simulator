@@ -30,6 +30,9 @@ build-backend = "setuptools.build_meta"
 where = ["."]
 include = ["what_if_app*"]
 
+[tool.setuptools.package-data]
+what_if_app = ["data/*.csv"]
+
 [project.optional-dependencies]
 dev = [
   "pytest>=8.0",

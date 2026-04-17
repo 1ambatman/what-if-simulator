@@ -18,6 +18,7 @@ from pydantic import BaseModel, Field
 from what_if_app import ml_core
 from what_if_app.config import settings
 from what_if_app.databricks_io import fetch_customer_pairs_from_input_table, fetch_profiles_from_predictions_table, parse_prediction_json
+from what_if_app.feature_dictionary import get_feature_descriptions
 from what_if_app.ml_core import PRESET_SCENARIOS, get_booster, init_runtime, load_model_from_mlflow
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -172,6 +173,7 @@ def meta() -> dict[str, Any]:
         "profile_count": len(profiles_store),
         "tier_boundaries": [[tn, lo, hi] for tn, lo, hi in ml_core.TIER_BOUNDARIES],
         "tier_labels": {k: [float(v[0]), float(v[1])] for k, v in ml_core.TIER_LABELS.items()},
+        "feature_descriptions": get_feature_descriptions(),
     }
 
 

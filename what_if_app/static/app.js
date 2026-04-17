@@ -205,10 +205,14 @@ function parseIds(text) {
 }
 
 let currentManual = {};
+/** feature name -> description from Unified RCM V1 data dictionary (`/api/meta`). */
+let featureDescriptions = {};
 
 async function refreshMeta() {
   const meta = await api("/api/meta");
   $("#predictions-table").value = meta.predictions_table_default || "";
+  featureDescriptions =
+    meta.feature_descriptions && typeof meta.feature_descriptions === "object" ? meta.feature_descriptions : {};
   tierDefaults = {
     boundaries: (meta.tier_boundaries || FALLBACK_TIER.boundaries).map((r) => [...r]),
     labels: meta.tier_labels ? JSON.parse(JSON.stringify(meta.tier_labels)) : JSON.parse(JSON.stringify(FALLBACK_TIER.labels)),
@@ -392,7 +396,7 @@ function renderWaterfallSvg(baseValue, score, rows) {
   for (let i = 0; i < n; i++) {
     const row = 1 + i;
     const st = steps[i];
-    svg += `<g><title>${svgEscape(st.feature)}</title>
+    svg += `<g><title>${svgEscape(featureHoverTitle(st.feature))}</title>
       <text class="wf-feat-val" x="12" y="${yMid(row) - 10}">${svgEscape(`${formatFeatVal(st.value)} =`)}</text>
       <text class="wf-feat-name" x="12" y="${yMid(row) + 14}">${svgEscape(shortWaterfallFeat(st.feature))}</text>
     </g>`;
@@ -452,6 +456,24 @@ function escapeHtml(s) {
   return d.innerHTML;
 }
 
+function featureHoverTitle(featureName) {
+  const name = featureName != null ? String(featureName) : "";
+  const desc = featureDescriptions[name];
+  if (desc && String(desc).trim()) {
+    return `${name} — ${String(desc).trim()}`;
+  }
+  return name;
+}
+
+/** Escape for double-quoted HTML attributes (e.g. title="…"). */
+function escapeHtmlAttr(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 /** Insert HTML into a container using a &lt;template&gt; so SVG is parsed in the SVG namespace (avoids missing charts with innerHTML in some browsers). */
 function mountHtml(container, html) {
   const t = document.createElement("template");
@@ -501,22 +523,30 @@ function renderCompare(data) {
     ${
       rows.length
         ? `<div class="card"><h3>Top feature deltas</h3>
+      <div class="delta-table-wrap">
       <table class="delta-table">
         <thead><tr>
-          <th>feature</th><th>Δ value</th><th>Δ SHAP</th>
+          <th>feature</th>
+          <th>Value before</th>
+          <th>Value after</th>
+          <th>Δ value</th>
+          <th>Δ SHAP</th>
         </tr></thead>
         <tbody>
           ${rows
             .map(
               (r) => `<tr>
-            <td title="${escapeHtml(r.feature)}">${escapeHtml(r.feature)}</td>
+            <td title="${escapeHtmlAttr(featureHoverTitle(r.feature))}">${escapeHtml(r.feature)}</td>
+            <td>${Number(r.original_value).toFixed(4)}</td>
+            <td>${Number(r.modified_value).toFixed(4)}</td>
             <td>${Number(r.value_change).toFixed(4)}</td>
             <td>${Number(r.shap_delta).toFixed(4)}</td>
           </tr>`
             )
             .join("")}
         </tbody>
-      </table></div>`
+      </table>
+      </div></div>`
         : ""
     }`;
 }
@@ -545,7 +575,7 @@ async function loadManualSliders(profileId) {
       row.className = "slider-row";
       const id = `sf-${s.name.replace(/[^a-zA-Z0-9]/g, "_")}`;
       row.innerHTML = `
-        <label for="${id}"><span>${escapeHtml(s.label)}</span><span>${s.value.toFixed(3)}</span></label>
+        <label for="${id}" title="${escapeHtmlAttr(featureHoverTitle(s.name))}"><span>${escapeHtml(s.label)}</span><span>${s.value.toFixed(3)}</span></label>
         <input id="${id}" type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.value}" />
       `;
       const input = row.querySelector("input");

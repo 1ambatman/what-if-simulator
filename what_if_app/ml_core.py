@@ -301,7 +301,10 @@ def feature_delta_table(
     )
     df["abs_shap_delta"] = df["shap_delta"].abs()
     df = df.sort_values("abs_shap_delta", ascending=False).head(n).reset_index(drop=True)
-    return json.loads(df.to_json(orient="records"))
+    out = df[
+        ["feature", "original_value", "modified_value", "value_change", "shap_delta"]
+    ].copy()
+    return json.loads(out.to_json(orient="records"))
 
 
 # --- Preset scenarios (unchanged from notebook) ---

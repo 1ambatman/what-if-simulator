@@ -6,6 +6,10 @@ Local web app that reproduces the **what_if_simulator** notebook: load customer 
 
 - **GitHub:** [github.com/1ambatman/zds-what-if-simulator](https://github.com/1ambatman/zds-what-if-simulator)
 
+## Feature dictionary
+
+Hover tooltips for feature names (SHAP charts, **Top feature deltas**, manual sliders) come from **`what_if_app/data/unified_rcm_v1_features.csv`** (Unified RCM V1: `Feature` + `Feature Description`). Edit or replace that file to update descriptions; the app loads it at `/api/meta` as `feature_descriptions`.
+
 ## Prerequisites
 
 - Python 3.10+

@@ -1,0 +1,110 @@
+Rank,Feature,Importance,Normalized Score,Feature Description
+1,charge_approved_pct_lag1d_7d,17461315.61,31.83%,percentage of approved charges in the past 7 days
+2,delinquent_cnt_lag1d_14d,5103713.235,9.30%,count of delinquents in the past 14 days
+3,charge_approved_pct_lag1d_14d,3158263.71,5.64%,percentage of approved charges in the past 14 days
+4,delinquent_cnt_dpd_gte3_lag1d_42d,2956859.889,5.28%,count of delinquents that are 3+ dpd in the past 42 days
+5,delinquent_amt_max_lag1d_7d,2184601.472,3.90%,max amount of delinquent in the past 7 days
+6,delinquent_cnt_dpd_gte7_lag1d_3m,1903520.626,3.40%,count of delinquents that are 7+ dpd in the past 3 months
+7,credit_utilization_lag1d,1734579.738,3.10%,ratio of credit utilization
+8,delinquent_cnt_dpd_gte7_lag1d_30d,1580484.437,2.82%,count of delinquents that are 7+ dpd in the past 30 days
+9,paid_amt_sum_lag1d_36m,858791.4555,1.53%,sum of amounts paid in the past 36 months
+10,retry_charge_amt_pct_lag1d_7d,800131.4155,1.43%,percentage of retried charges in the past 7 days
+11,delinquent_cnt_dpd_gte14_lag1d_60d,658639.7307,1.18%,count of delinquents that are 14+ dpd in the past 60 days
+12,ontime_amt_sum_lag1d_24m,635342.7077,1.14%,sum of amounts paid ontime in the past 24 months
+13,retry_charge_pct_lag1d_36m,617254.4767,1.10%,percentage of retried charges in the past 36 months
+14,outstanding_amt_lag1d,494515.5504,0.88%,current outstanding amount
+15,late_amt_sum_lag1d_36m,485693.8921,0.87%,sum of amounts paid late in the past 36 months
+16,delinquent_cnt_dpd_gte14_lag1d_6m,484929.6971,0.87%,count of delinquents that are 14+ dpd in the past 6 months
+17,exposure_limit_lag1d,389389.3204,0.70%,latest exposure limit as of the previous day
+18,paid_amt_sum_lag1d_14d,357599.5819,0.64%,sum of installment amounts paid in the past 14 days
+19,retry_charge_pct_lag1d_14d,351368.8851,0.63%,percentage of retried charges in the past 14 days
+20,retry_charge_pct_lag1d_6m,315937.2176,0.56%,percentage of retried charges in the past 6 months
+21,late_amt_max_lag1d_36m,310494.5766,0.55%,max installment amount paid late in the past 36 months
+22,delinquent_cnt_lag1d_30d,301782.9577,0.54%,count of delinquent in the past 30 days
+23,delinquent_cnt_dpd_gte7_lag1d_7d,301034.6757,0.54%,count of delinquents that are 7+ dpd in the past 7 days
+24,transact_order_amt_max_lag1d_42d,282018.6404,0.50%,max transacted amount in the past 42 days
+25,pr_approved_declined_amt_ratio_lag1d_36m,279535.9105,0.50%,ratio of approved to declined purchase request amounts in the past 36 months
+26,charge_declined_insufficient_funds_pct_lag1d_7d,260585.2726,0.47%,percentage of charges declined due to insufficient funds in the past 7 days
+27,scheduled_charge_amt_sum_lag1d_36m,259788.3133,0.46%,sum of amounts scheduled charges in the past 36 months
+28,retry_charge_pct_lag1d_7d,256797.4797,0.46%,percentage of retried charges in the past 7 days
+29,delinquent_amt_sum_dpd_gte3_lag1d_60d,252031.9722,0.45%,sum of installment amounts that are 3+ dpd in the past 60 days
+30,paid_amt_max_lag1d_7d,251681.1515,0.45%,max installment amount paid in the past 7 days
+31,early_amt_sum_lag1d_6m,248295.1725,0.44%,sum of installment amounts that are paid early in the past 6 months
+32,transact_extension_request_cnt_3m,242969.6131,0.43%,count of extensions requested in the past 3 months
+33,scheduled_charge_amt_pct_lag1d_36m,236176.4164,0.42%,percentage of scheduled charges in the past 36 months
+34,due_amt_min_lag1d_60d_90d,233847.1923,0.42%,min installment amount due in the past 30 days starting from 60 days ago
+35,transact_extension_request_cnt_30d,210672.0797,0.38%,count of extentsions requested in the past 30 days
+36,card_active_cnt_lag1d,206691.3058,0.37%,count of active payment cards
+37,delinquent_amt_sum_dpd_gte7_lag1d_7d,201007.062,0.36%,sum of installment amounts that are 7+ dpd in the past 7 days
+38,transact_checkout_order_cnt_lag1d_36m,196169.9223,0.35%,count of checkout orders in the past 36 months
+39,delinquent_amt_sum_dpd_gte14_lag1d_12m,194406.2805,0.35%,sum of installment amounts that are 14+ delinquent in the past 12 months
+40,paid_amt_max_lag1d_36m,194183.4109,0.35%,max amount paid in the past 36 months
+41,pr_cnt_lag1d_14d,192571.2756,0.34%,count of purchase request in the past 14 days
+42,charge_declined_insufficient_funds_amt_sum_lag1d_36m,186710.1812,0.33%,sum of declined charges amount due to insufficient funds in the past 36 months
+43,scheduled_charge_amt_pct_lag1d_12m,177566.2009,0.32%,percentage of scheduled charges in the past 12 months
+44,retry_charge_pct_lag1d_30d_60d,177045.7382,0.32%,percentage of retry charges in the past 60 days
+45,days_since_first_order_lag1d,172736.8638,0.31%,number of days since the first order(capped to 1080 days/3 years)
+46,manual_charge_amt_sum_lag1d_36m,172261.5729,0.31%,sum of amounts of manual charges in the past 36 months
+47,delinquent_cnt_dpd_gte7_lag1d_6m,171201.1874,0.31%,count of delinquents that are 7+ dpd in the past 6 months
+48,pr_cnt_lag1d_30d,168706.1599,0.30%,count of purchase request in the past 30 days
+49,retry_charge_amt_min_lag1d_3m,168112.8723,0.30%,min amount of retried charges in the past 3 months
+50,payment_card_cnt_lag1d_7d,166114.3598,0.30%,count of cards used for payment in the past 7 days
+51,paid_amt_max_lag1d_30d,151074.3252,0.27%,max installment amount paid in the past 30 days
+52,card_added_cnt_lag1d_12m,150799.7596,0.27%,count of payment cards added in the past 12 months
+53,pr_approved_declined_amt_ratio_lag1d_6m,149990.5764,0.27%,ratio of approved to declined purchase request amounts in the past 6 months
+54,days_since_last_order_lag1d,149552.3423,0.27%,number of days since the last order(capped to 1080 days/3 years)
+55,retry_charge_pct_lag1d_60d_90d,148554.672,0.27%,percentage of retry charges in the past 30 days starting from 60 days ago
+56,delinquent_amt_max_dpd_gte14_lag1d_7d,144294.0377,0.26%,max of installment amounts that are 14+ dpd in the past 7 days
+57,pr_approved_amt_sum_lag1d_42d,144077.2742,0.26%,sum of amounts of approved purchase request in the past 42 days
+58,charge_declined_amt_min_lag1d_30d,142711.892,0.26%,min declined charge amount in the past 30 days
+59,delinquent_amt_sum_dpd_gte7_lag1d_30d,137782.6123,0.25%,sum of installment amounts that are 7+ dpd in the past 30 days
+60,delinquent_amt_sum_dpd_gte14_lag1d_6m,137742.084,0.25%,sum of installment amounts that are 14+ dpd in the past 6 months
+61,payment_card_first_use_cnt_lag1d_3m,135659.3307,0.24%,count of first time use of a payment card in the past 3 months
+62,retry_charge_amt_min_lag1d_6m,125833.4855,0.22%,min amount of retried charges in the past 6 months
+63,early_amt_max_lag1d_14d,123927.695,0.22%,max installment amount paid early in the past 14 days
+64,card_added_cnt_lag1d_6m,123651.9009,0.22%,count of payment cards added in the past 6 months
+65,delinquent_amt_avg_dpd_gte14_lag1d_36m,121118.7985,0.22%,average of installment amounts that are 14+ dpd in the past 36 months
+66,pr_declined_cnt_lag1d_6m,116082.3302,0.21%,count of declined purchase request in the past 6 months
+67,early_amt_sum_lag1d_30d,115143.61,0.21%,sum of installment amounts paid early in the past 30 days
+68,ontime_amt_max_lag1d_14d,114520.9031,0.20%,max installment amount paid ontime in the past 14 days
+69,transact_vfi_order_pct_lag1d_36m,112205.6448,0.20%,percentage of orders that are VFI in the past 36 months
+70,retry_charge_amt_pct_lag1d_12m,110072.5916,0.20%,percentage of retry charge amounts in the past 12 months
+71,pr_declined_amt_sum_lag1d_60d,107782.0118,0.19%,sum of declined purchase request amounts in the past 60 days
+72,paid_amt_min_lag1d_30d,107726.9151,0.19%,min installment amount paid in the past 30 days
+73,late_amt_max_lag1d_30d,104982.635,0.19%,max amount of installments that are paid late in the past 30 days
+74,transact_order_amt_sum_lag1d_42d,104762.4089,0.19%,Sum of order amounts transacted in the past 42 days
+75,payment_card_first_use_cnt_lag1d_12m,104192.5642,0.19%,count of first time payment card usage in the past 12 months
+76,manual_charge_amt_pct_lag1d_30d,102423.7901,0.18%,percentage of manual charges amount in the past 30 days
+77,delinquent_cnt_dpd_gte14_lag1d_12m,102382.1355,0.18%,count of delinquents that are 14+ dpd in the past 12 months
+78,days_since_first_approval_lag1d,97247.6618,0.17%,number of days since first approval(capped to 1080/3 years)
+79,delinquent_cnt_dpd_gte14_lag1d_7d,95445.11586,0.17%,count of delinquents that are 14+ dpd in the past 7 days
+80,pr_declined_cnt_lag1d_3m,94091.68555,0.17%,count of declined purchase request in the past 3 months
+81,paid_amt_max_lag1d_14d,91475.64771,0.16%,max installment amount paid in the past 14 days
+82,pr_approved_declined_amt_ratio_lag1d_42d,91473.69983,0.16%,ratio of approved to declined purchase request amounts in the past 42 days
+83,charge_declined_insufficient_funds_pct_lag1d_14d,90654.83771,0.16%,percentage of charges declined due to insufficient funds in the past 14 days
+84,paid_cnt_lag1d_30d,90292.44817,0.16%,count of paid installments in the past 30 days
+85,delinquent_cnt_dpd_gte14_lag1d_36m,85282.48763,0.15%,count of delinquents that are 14+ dpd in the past 36 months
+86,retry_charge_pct_lag1d_12m,84579.94226,0.15%,percentage of retried charges in the past 12 months
+87,transact_vfi_order_pct_lag1d_24m,83281.85229,0.15%,percentage of VFI orders in the past 24 months
+88,pr_declined_amt_sum_lag1d_3m,81430.10002,0.15%,sum of declined purchase request amounts in the past 3 months
+89,paid_amt_min_lag1d_7d,80446.14932,0.14%,min installment amount paid in the past 7 days
+90,transact_vfi_order_cnt_lag1d_6m,80081.58965,0.14%,count of VFI orders in the past 6 months
+91,delinquent_amt_avg_lag1d_60d,78916.76001,0.14%,average installment amounts of delinquent in the past 60 days
+92,early_amt_avg_lag1d_7d,77903.91335,0.14%,average installment amount paid early in the past 7 days
+93,late_amt_avg_lag1d_14d,71009.49757,0.13%,averge installment amount paid late in the past 14 days
+94,late_amt_sum_lag1d_30d,70552.73694,0.13%,sum of installment amounts paid late in the past 30 days
+95,gt4_installments_order_pct_lag1d_6m,69576.34282,0.12%,percentage of orders with greater than four installments in the past 6 months
+96,delinquent_amt_avg_dpd_gte14_lag1d_24m,68855.20778,0.12%,average of installment amounts that are 14+ dpd in the past 24 months
+97,early_amt_sum_lag1d_14d,67534.99797,0.12%,sum of installment amount paid early in the past 14 days
+98,manual_charge_amt_pct_lag1d_14d,63551.21468,0.11%,percentage of manual charges in the past 14 days
+99,delinquent_amt_max_dpd_gte7_lag1d_30d,60284.69115,0.11%,max installment amount that are 7+ dpd in the past 30 days
+100,transact_order_amt_max_lag1d_14d,58839.68274,0.11%,max of order amount transacted in the past 14 days
+101,delinquent_amt_sum_dpd_gte14_lag1d_36m,58524.08902,0.10%,sum of installment amounts that are 14+ dpd in the past 36 months
+102,delinquent_amt_max_dpd_gte7_lag1d_7d,58512.57922,0.10%,max installment amount that are 7+ dpd in the past 7 days
+103,charge_declined_insufficient_funds_amt_max_lag1d_7d,54309.48566,0.10%,max amount of declined charges due to insufficient funds in the past 7 days
+104,transact_channelpartner_order_pct_lag1d_42d,50944.47258,0.09%,percentage of orders from channel partners(i.e except app/co) in the past 42 days
+105,late_cnt_lag1d_30d,48243.80269,0.09%,count of installments paid late in the past 30 days
+106,ontime_amt_avg_lag1d_7d,46495.68854,0.08%,average installment amount paid  ontime in the past 7 days
+107,paid_amt_min_lag1d_14d,44310.6019,0.08%,min installment amount paid in the past 14 days
+108,pr_cnt_lag1d_7d,31659.30785,0.06%,count of purchase request in the past 7 days
+109,gt4_installments_order_pct_lag1d_3m,31451.64192,0.06%,percentage of orders with greater than four installments in the past 3 months
