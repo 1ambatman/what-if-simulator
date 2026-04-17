@@ -509,7 +509,7 @@ function renderCompare(data) {
           ${rows
             .map(
               (r) => `<tr>
-            <td title="${escapeHtml(r.feature)}">${escapeHtml(shortFeat(r.feature))}</td>
+            <td title="${escapeHtml(r.feature)}">${escapeHtml(r.feature)}</td>
             <td>${Number(r.value_change).toFixed(4)}</td>
             <td>${Number(r.shap_delta).toFixed(4)}</td>
           </tr>`

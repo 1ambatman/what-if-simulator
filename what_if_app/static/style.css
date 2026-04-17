@@ -654,20 +654,42 @@ textarea {
 .delta-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.72rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
   font-family: var(--mono);
+}
+
+.delta-table th {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
 }
 
 .delta-table th,
 .delta-table td {
-  padding: 0.35rem 0.45rem;
+  padding: 0.5rem 0.55rem;
   border-bottom: 1px solid var(--border);
   text-align: right;
+  vertical-align: top;
 }
 
 .delta-table th:first-child,
 .delta-table td:first-child {
   text-align: left;
+}
+
+.delta-table td:first-child {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.delta-table td:not(:first-child) {
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .foot {
