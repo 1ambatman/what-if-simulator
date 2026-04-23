@@ -1,8 +1,20 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def _find_env_file() -> str:
+    """Walk up from this file's location to find the nearest .env."""
+    here = Path(__file__).resolve().parent
+    for directory in [here, *here.parents]:
+        candidate = directory / ".env"
+        if candidate.exists():
+            return str(candidate)
+    return ".env"  # fallback: let pydantic-settings skip gracefully
+
+
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(env_file=_find_env_file(), env_file_encoding="utf-8", extra="ignore")
 
     # When set (e.g. DEFAULT), host/token missing from .env are read from ~/.databrickscfg — same as AI dev kit MCP.
     databricks_config_profile: str = ""
@@ -20,6 +32,8 @@ class Settings(BaseSettings):
     mlflow_registry_uri: str = "databricks-uc"
 
     predictions_table: str = "mle.batch_model_inference.predictions"
+    # Optional Delta table for feature descriptions: feature_name STRING, description STRING
+    feature_dictionary_table: str = ""
     mlflow_run_id: str = "9d740e9e5f544d9490100cef238bf074"
     # Subpath under the run for mlflow.lightgbm.log_model, or "auto" to find the folder that contains MLmodel
     mlflow_model_artifact_path: str = "auto"
