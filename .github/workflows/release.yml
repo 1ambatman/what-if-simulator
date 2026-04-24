@@ -74,6 +74,14 @@ jobs:
           cd dist && zip -r "../${ZIP}" . && cd ..
           echo "ZIP=${ZIP}" >> "$GITHUB_ENV"
 
+      - name: Make container package public
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sleep 5
+          gh api --method PATCH /user/packages/container/zds-what-if-simulator \
+            -f visibility=public || true
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
